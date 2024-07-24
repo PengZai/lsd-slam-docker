@@ -1,14 +1,9 @@
 cmake_minimum_required(VERSION 2.8.7)
 project(lsd_slam_core)
 
-# Set the build type. Options are:
-#  Coverage : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug : w/ debug symbols, w/o optimization
-#  Release : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel : w/o debug symbols, w/ optimization, stripped binaries
 set(CMAKE_BUILD_TYPE Release)
 
+find_package(OpenCV REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   dynamic_reconfigure
@@ -16,12 +11,28 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   roscpp
   rosbag
+  cmake_modules
 )
 
 find_package(Eigen REQUIRED)
 find_package(X11 REQUIRED)
 include(cmake/FindG2O.cmake)
 include(cmake/FindSuiteParse.cmake)
+
+find_path(CSPARSE_INCLUDE_DIR NAMES cs.h
+  PATHS
+  /usr/include/suitesparse
+  /usr/include
+  /opt/local/include
+  /usr/local/include
+  /sw/include
+  /usr/include/ufsparse
+  /opt/local/include/ufsparse
+  /usr/local/include/ufsparse
+  /sw/include/ufsparse
+  PATH_SUFFIXES
+  suitesparse
+)
 
 message("-- CHOLMOD_INCLUDE_DIR : " ${CHOLMOD_INCLUDE_DIR})
 message("-- CSPARSE_INCLUDE_DIR : " ${CSPARSE_INCLUDE_DIR})
@@ -87,17 +98,18 @@ set(SOURCE_FILES
 
 include_directories(
   include
-  ${EIGEN3_INCLUDE_DIR}
+  ${EIGEN_INCLUDE_DIR}
   ${PROJECT_SOURCE_DIR}/src
   ${PROJECT_SOURCE_DIR}/thirdparty/Sophus
   ${CSPARSE_INCLUDE_DIR} #Has been set by SuiteParse
   ${CHOLMOD_INCLUDE_DIR} #Has been set by SuiteParse
+  ${catkin_INCLUDE_DIRS}
 )
 
 
 # build shared library.
 add_library(lsdslam SHARED ${SOURCE_FILES})
-target_link_libraries(lsdslam ${FABMAP_LIB} ${G2O_LIBRARIES} ${catkin_LIBRARIES} csparse cxsparse )
+target_link_libraries(lsdslam ${FABMAP_LIB} ${G2O_LIBRARIES} ${catkin_LIBRARIES} ${CSPARSE_INCLUDE_DIR} X11 ${OpenCV_LIBS})
 #rosbuild_link_boost(lsdslam thread)
 
 
@@ -111,5 +123,3 @@ add_executable(dataset src/main_on_images.cpp)
 target_link_libraries(dataset lsdslam ${catkin_LIBRARIES} ${G2O_LIBRARIES})
 
 # TODO add INSTALL
-
-

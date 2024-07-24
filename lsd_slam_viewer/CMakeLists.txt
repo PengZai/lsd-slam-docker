@@ -27,14 +27,22 @@ find_package(OpenGL REQUIRED)
 set(QT_USE_QTOPENGL TRUE)
 set(QT_USE_QTXML TRUE)
 find_package(QGLViewer REQUIRED)
-find_package(Eigen REQUIRED)
+# find_package(Eigen REQUIRED)
+set(Eigen_INCLUDE_DIRS "/usr/local/include/eigen3")
+set(EIGEN_INCLUDE_DIR "/usr/local/include/eigen3")
+
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread)
 
-include_directories(${QGLVIEWER_INCLUDE_DIR}
-		    ${catkin_INCLUDE_DIRS} 
-		    ${EIGEN_INCLUDE_DIR}
-		    ${QT_INCLUDES} )
+include(cmake/FindG2O.cmake)
+
+include_directories(
+  ${QGLVIEWER_INCLUDE_DIR}
+  ${catkin_INCLUDE_DIRS} 
+  ${EIGEN_INCLUDE_DIR}
+  ${QT_INCLUDES}
+  ${G2O_INCLUDE_DIR}
+)
 
 # SSE flags
 set(CMAKE_CXX_FLAGS
