@@ -3,41 +3,66 @@
 If you want to install LSD-SLAM directly with Ubuntu 18.04 without docker, please follow the commands in [Dockerfile](Dockerfile) manually.\
 Orignal LSD-SLAM README can be found [here](lsd_readme.md).
 
-## Installation
+## Build Docker Image
 1. Clone this repository:
 ```bash
-git clone https://github.com/zhangganlin/lsd-slam-docker.git
+git clone https://github.com/zhangganlin/lsd-slam-docker.git lsd_ws
 ```
+2. Change xhost
+```bash
+# Run this command every time you boot
+xhost +local:root
+```
+
 2. Build the docker image:
 ```bash
-cd lsd-slam-docker
+cd lsd_ws
 docker build -t lsd-slam .
 ``` 
 3. Install `nvidia-container-toolkit` for GPU support:\
 Instruction can be found at: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
 
-## Running LSD-SLAM
-1. Enable visualization
-```bash
-xhost +local:root
-```
-
-2. Create a lsd-slam container and run `roscore` 
+## Install LSD-SLAM inside Docker
+1. Create a lsd-slam container
 ```bash
 docker run -it --privileged --name lsd-slam --network host \
     --env NVIDIA_VISIBLE_DEVICES=all \
     --env NVIDIA_DRIVER_CAPABILITIES=all \
     --env DISPLAY=$DISPLAY --env QT_X11_NO_MITSHM=1 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v .:/root/lsd_ws \
     --gpus all  --device /dev/dri:/dev/dri \
-    lsd-slam /bin/bash -c "source /opt/ros/melodic/setup.sh && roscore"
+    lsd-slam /bin/bash
+```
+
+2. Inside the container, install LSD-SLAM
+```bash
+cd /root/lsd_ws
+catkin_make
+```
+
+3. Inside the container, download demo dataset 
+```bash
+mkdir -p datasets && cd datasets
+wget https://vision.in.tum.de/webshare/g/lsd/LSD_room.bag.zip
+unzip LSD_room.bag.zip && rm LSD_room.bag.zip
+```
+
+## Running LSD-SLAM
+
+
+2. Inside the container, run `roscore`
+```bash
+docker exec -it  --privileged lsd-slam \
+    bash -c "source /opt/ros/melodic/setup.sh && \
+             roscore"
 ```
 
 3. In a new terminal, run lsd-slam
 ```bash
 docker exec -it  --privileged  lsd-slam \
     bash -c "source /opt/ros/melodic/setup.sh && \
-             source /root/ros-lsd/devel/setup.sh && \
+             source /root/lsd_ws/devel/setup.sh && \
              rosrun lsd_slam_core \
                     live_slam image:=/image_raw \
                     camera_info:=/camera_info"
@@ -47,7 +72,7 @@ docker exec -it  --privileged  lsd-slam \
 ```bash
 docker exec -it  --privileged lsd-slam \
     bash -c "source /opt/ros/melodic/setup.sh && \
-             source /root/ros-lsd/devel/setup.sh && \
+             source /root/lsd_ws/devel/setup.sh && \
              rosrun lsd_slam_viewer viewer"
 ```
 
@@ -55,8 +80,8 @@ docker exec -it  --privileged lsd-slam \
 ```bash
 docker exec -it  --privileged  lsd-slam \
     bash -c "source /opt/ros/melodic/setup.sh && \
-             source /root/ros-lsd/devel/setup.sh && \
-             rosbag play /root/datasets/LSD_room.bag"
+             source /root/lsd_ws/devel/setup.sh && \
+             rosbag play /root/lsd_ws/datasets/LSD_room.bag"
 ```
 
 ## Docker Tips

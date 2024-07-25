@@ -41,16 +41,10 @@ RUN apt install -y libqglviewer-dev-qt4
 
 RUN cd /usr/lib/x86_64-linux-gnu && ln -s libQGLViewer-qt4.so libQGLViewer.so
 
-RUN mkdir -p /root/ros-lsd/src && cd /root/ros-lsd/src && git clone https://github.com/zhangganlin/lsd-slam.git
-RUN bash -c "source /opt/ros/melodic/setup.sh && cd /root/ros-lsd && catkin_make"
-
-RUN mkdir -p /root/datasets \
-    && cd /root/datasets \
-    && wget https://vision.in.tum.de/webshare/g/lsd/LSD_room.bag.zip \
-    && unzip LSD_room.bag.zip \
-    && rm LSD_room.bag.zip
+# RUN cd /root && git clone https://github.com/zhangganlin/lsd-slam-docker.git lsd_ws
+# RUN bash -c "source /opt/ros/melodic/setup.sh && cd /root/lsd_ws && catkin_make"
 
 RUN apt clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-WORKDIR /root/ros-lsd
+WORKDIR /root/lsd_ws
 CMD ["bash"]
