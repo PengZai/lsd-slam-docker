@@ -93,7 +93,7 @@ docker rm lsd-slam
 ```
 Notice that removing a container would NOT remove the corresponding docker image, i.e. if you want to use the image again, just create another container, which would not take much time since we have already built the docker image.
 
-4. Remove docker image. This would delete the enviroment completely.
+4. Remove docker image. This would delete the environment completely.
 ```
 docker rmi lsd-slam
 ```
