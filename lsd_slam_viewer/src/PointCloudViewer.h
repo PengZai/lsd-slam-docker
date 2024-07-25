@@ -95,7 +95,7 @@ public:
 		qglviewer::Quaternion orient;
 
 
-		float x,y,z;
+		qreal x,y,z;
 
 		if(17 != sscanf(s.c_str(),"Animation: %d at %lf (dur %lf) S: %f %f %d %d %d %d %d Frame: %lf %lf %lf %lf %f %f %f %d\n",
 				&isSettings_i, &time, &duration,

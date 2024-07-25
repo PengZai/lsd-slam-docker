@@ -8,6 +8,7 @@ project(lsd_slam_viewer)
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel : w/o debug symbols, w/ optimization, stripped binaries
 set(CMAKE_BUILD_TYPE Release)
+add_compile_options(-w)
 
 ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/thirdparty/Sophus)
 
@@ -21,7 +22,16 @@ find_package(catkin REQUIRED COMPONENTS
   rosbag
   message_generation
   roslib
+  cmake_modules
 )
+
+add_message_files(DIRECTORY msg FILES keyframeMsg.msg keyframeGraphMsg.msg)
+generate_messages(DEPENDENCIES )
+generate_dynamic_reconfigure_options(
+  cfg/LSDSLAMViewerParams.cfg
+)
+
+catkin_package(CATKIN_DEPENDS message_runtime)
 
 find_package(OpenGL REQUIRED)
 set(QT_USE_QTOPENGL TRUE)
@@ -34,27 +44,16 @@ set(EIGEN_INCLUDE_DIR "/usr/local/include/eigen3")
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread)
 
-include(cmake/FindG2O.cmake)
-
-include_directories(
-  ${QGLVIEWER_INCLUDE_DIR}
-  ${catkin_INCLUDE_DIRS} 
-  ${EIGEN_INCLUDE_DIR}
-  ${QT_INCLUDES}
-  ${G2O_INCLUDE_DIR}
-)
+include_directories(${QGLVIEWER_INCLUDE_DIR}
+		    ${catkin_INCLUDE_DIRS} 
+		    ${EIGEN_INCLUDE_DIR}
+		    ${QT_INCLUDES} )
 
 # SSE flags
 set(CMAKE_CXX_FLAGS
    "${CMAKE_CXX_FLAGS} -march=native -Wall -std=c++0x"
 )
 
-add_message_files(DIRECTORY msg FILES keyframeMsg.msg keyframeGraphMsg.msg)
-generate_messages(DEPENDENCIES)
-
-generate_dynamic_reconfigure_options(
-  cfg/LSDSLAMViewerParams.cfg
-)
 
 
 # Sources files
@@ -84,7 +83,7 @@ target_link_libraries(viewer ${QGLViewer_LIBRARIES}
 			     ${QT_LIBRARIES}
 			     GL glut GLU
 		     )
-
+add_dependencies(viewer ${${PROJECT_NAME}_EXPORTED_TARGETS})
 #add_executable(videoStitch src/main_stitchVideos.cpp)
 #target_link_libraries(viewer ${QGLViewer_LIBRARIES}
 #			     ${QGLVIEWER_LIBRARY}

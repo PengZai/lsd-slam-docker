@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.7)
 project(lsd_slam_core)
 
 set(CMAKE_BUILD_TYPE Release)
-
+add_compile_options(-w)
 find_package(OpenCV REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
@@ -53,7 +53,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   LIBRARIES lsdslam
   DEPENDS Eigen SuiteSparse
-  CATKIN_DEPENDS libg2o 
+  CATKIN_DEPENDS libg2o
 )
 
 # SSE flags
@@ -98,7 +98,7 @@ set(SOURCE_FILES
 
 include_directories(
   include
-  ${EIGEN_INCLUDE_DIR}
+  ${EIGEN3_INCLUDE_DIR}
   ${PROJECT_SOURCE_DIR}/src
   ${PROJECT_SOURCE_DIR}/thirdparty/Sophus
   ${CSPARSE_INCLUDE_DIR} #Has been set by SuiteParse
@@ -108,10 +108,11 @@ include_directories(
 
 
 # build shared library.
+
 add_library(lsdslam SHARED ${SOURCE_FILES})
 target_link_libraries(lsdslam ${FABMAP_LIB} ${G2O_LIBRARIES} ${catkin_LIBRARIES} ${CSPARSE_INCLUDE_DIR} X11 ${OpenCV_LIBS})
 #rosbuild_link_boost(lsdslam thread)
-
+add_dependencies(lsdslam ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 # build live ros node
 add_executable(live_slam src/main_live_odometry.cpp)
