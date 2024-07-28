@@ -8,22 +8,22 @@ Orignal LSD-SLAM README can be found [here](lsd_readme.md).
 ```bash
 git clone https://github.com/zhangganlin/lsd-slam-docker.git lsd_ws
 ```
-2. Change xhost
+2. Change xhost:
 ```bash
 # Run this command every time you boot
 xhost +local:root
 ```
 
-2. Build the docker image:
+3. Build the docker image:
 ```bash
 cd lsd_ws
 docker build -t lsd-slam .
 ``` 
-3. Install `nvidia-container-toolkit` for GPU support:\
+4. Install `nvidia-container-toolkit` for GPU support:\
 Instruction can be found at: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
 
 ## Install LSD-SLAM inside Docker
-1. Create a lsd-slam container
+1. Create a lsd-slam container:
 ```bash
 docker run -it --privileged --name lsd-slam --network host \
     --env NVIDIA_VISIBLE_DEVICES=all \
@@ -35,13 +35,13 @@ docker run -it --privileged --name lsd-slam --network host \
     lsd-slam /bin/bash
 ```
 
-2. Inside the container, install LSD-SLAM
+2. Inside the container, install LSD-SLAM:
 ```bash
 cd /root/lsd_ws
 catkin_make
 ```
 
-3. Inside the container, download demo dataset 
+3. Inside the container, download demo dataset:
 ```bash
 mkdir -p datasets && cd datasets
 wget https://vision.in.tum.de/webshare/g/lsd/LSD_room.bag.zip
@@ -49,16 +49,19 @@ unzip LSD_room.bag.zip && rm LSD_room.bag.zip
 ```
 
 ## Running LSD-SLAM
+1. Restart the container if it has been stopped:
+```bash
+docker restart lsd-slam
+```
 
-
-2. Inside the container, run `roscore`
+2. Run `roscore`:
 ```bash
 docker exec -it  --privileged lsd-slam \
     bash -c "source /opt/ros/melodic/setup.sh && \
              roscore"
 ```
 
-3. In a new terminal, run lsd-slam
+3. In a new terminal, run lsd-slam:
 ```bash
 docker exec -it  --privileged  lsd-slam \
     bash -c "source /opt/ros/melodic/setup.sh && \
@@ -68,7 +71,7 @@ docker exec -it  --privileged  lsd-slam \
                     camera_info:=/camera_info"
 ```
 
-4. In a new terminal, run lsd-slam-viewer for visualization
+4. In a new terminal, run lsd-slam-viewer for visualization:
 ```bash
 docker exec -it  --privileged lsd-slam \
     bash -c "source /opt/ros/melodic/setup.sh && \
@@ -76,7 +79,7 @@ docker exec -it  --privileged lsd-slam \
              rosrun lsd_slam_viewer viewer"
 ```
 
-5. For testing, try with the example dataset (already inside the docker image)
+5. For testing, try with the example dataset (the corresponding rosbag has been already inside the docker image):
 ```bash
 docker exec -it  --privileged  lsd-slam \
     bash -c "source /opt/ros/melodic/setup.sh && \
