@@ -1,0 +1,60 @@
+FROM ubuntu:20.04
+
+RUN apt update
+ENV DEBIAN_FRONTEND=noninteractive 
+RUN apt install -y tzdata
+RUN apt install -y wget cmake build-essential
+
+ARG ROS_DISTRO=noetic
+ARG NPROC=4
+
+
+RUN apt remove libeigen3-dev
+
+RUN wget https://gitlab.com/libeigen/eigen/-/archive/3.2.5/eigen-3.2.5.tar.gz && \
+    tar -xzvf eigen-3.2.5.tar.gz && \
+    cd eigen-3.2.5 && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make install && \
+    cd ../.. && \
+    rm -rf eigen-3.2.5 eigen-3.2.5.tar.gz
+
+
+RUN apt install -y gnupg2 curl lsb-core python3-pip libopencv-dev libopencv-contrib-dev
+
+
+# install ros packages
+RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' && \
+    curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-${ROS_DISTRO}-ros-base \
+    ros-${ROS_DISTRO}-perception && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt install -y python3-rosdep python3-rosinstall python3-rosinstall-generator python3-vcstool python3-catkin-tools python3-osrf-pycommon
+
+
+RUN rosdep init &&  rosdep update --rosdistro $ROS_DISTRO
+
+RUN apt-get install -y \
+    ros-${ROS_DISTRO}-hector-trajectory-server \
+    ros-${ROS_DISTRO}-rviz \
+    ros-${ROS_DISTRO}-image-geometry ros-${ROS_DISTRO}-pcl-ros \
+    ros-${ROS_DISTRO}-cv-bridge pkg-config autoconf \
+    ros-${ROS_DISTRO}-libg2o  \
+    liblapack-dev \
+    libblas-dev freeglut3-dev libsuitesparse-dev libx11-dev \
+    libqglviewer-dev-qt5 
+    
+RUN cd /usr/lib/x86_64-linux-gnu && ln -s libQGLViewer-qt5.so libQGLViewer.so
+RUN apt install -y software-properties-common
+RUN python3 -m pip install -U catkin_tools
+
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /root/.bashrc
+RUN echo "source /root/catkin_ws/devel/setup.bash" >> /root/.bashrc
+
+
+WORKDIR /root

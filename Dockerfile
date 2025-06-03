@@ -44,7 +44,12 @@ RUN cd /usr/lib/x86_64-linux-gnu && ln -s libQGLViewer-qt4.so libQGLViewer.so
 # RUN cd /root && git clone https://github.com/zhangganlin/lsd-slam-docker.git lsd_ws
 # RUN bash -c "source /opt/ros/melodic/setup.sh && cd /root/lsd_ws && catkin_make"
 
+RUN echo "source /opt/ros/melodic/setup.bash" >> /root/.bashrc
+RUN echo "source /root/catkin_ws/devel/setup.bash" >> /root/.bashrc
+
 RUN apt clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-WORKDIR /root/lsd_ws
+WORKDIR /root
+
+
 CMD ["bash"]
